@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smack the Fly</title>
+    <style>
+        header {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 90vh;
+        }
+
+        #intro {
+            display: none;
+            width: 300px;
+            border: solid 2px;
+            text-align: center;
+            border-radius: 1em;
+            cursor: pointer;
+        }
+
+        #intro.show {
+            display: block;
+        }
+
+        #fly {
+            position: absolute;
+            transition: .07s;
+            width: 100px;
+            height: 100px;
+            background-image: url('mosquito.jpg');
+            background-size: cover;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body onload="intro()">
+
+    <div id="fly"></div>
+
+    <header>
+        <div id="intro">
+            <h2>Hit the mosquito!</h2>
+            <p>Continue by hitting the fly again.</p>
+            <p id="lg-txt">Press space to pause.</p>
+        </div>
+    </header>
+
+
+    <audio id="buzz" preload="auto" loop>
+        <source src="sounds/buzz.mp3" type="audio/mpeg"> Your browser does not support this audio.
+    </audio>
+    <audio id="smack" preload="auto">
+        <source src="sounds/smack.mp3" type="audio/mpeg"> Your browser does not support this audio.
+    </audio>
+
+    <script>
+        var introBox = document.querySelector('#intro');
+        var lgtxt = introBox.querySelector('#lg-txt');
+        var fly = document.querySelector('#fly');
+        var buzz = document.querySelector('#buzz');
+        var smackSound = document.querySelector('#smack');
+        var paused = true;
+        var countSmacks = 0;
+        var move;
+        var speed = 1000;
+        var size = 100;
+
+        fly.addEventListener('click', smack);
+        introBox.addEventListener('click', smack);
+
+        console.log(introBox.lastElementChild.previousElementSibling);
+
+        if (screen.width < 400) {
+            introBox.removeChild(lgtxt);
+            speed = 800;
+            size = 80;
+        }
+
+        fly.style.width = fly.style.height = size + "px";
+
+        window.onkeyup = function (e) {
+            if (e.keyCode == 32) {
+                if (paused) {
+                    buzz.play();
+                    fly.style.backgroundImage = "url('mosquito.jpg')";
+                    move = setInterval(moveFly, speed);
+                    introBox.classList.remove('show');
+                    paused = false;
+                } else {
+                    buzz.pause();
+                    clearInterval(move);
+                    paused = true;
+                    introBox.classList.add('show');
+                }
+            }
+        }
+
+        function intro() {
+            showIntroTxt();
+            //setInterval(moveFly, speed);
+            buzz.pause();
+        }
+
+        function showIntroTxt() {
+            introBox.classList.add('show');
+        }
+
+        function moveFly() {
+            fly.style.left = (Math.random() * 90) + "vw";
+            fly.style.top = (Math.random() * 90) + "vh";
+            fly.style.transform = "rotate(" + (Math.random() * 360) + "deg)";
+        }
+
+        function smack() {
+            if (paused) {
+                countSmacks++;
+                moveFly();
+                buzz.play();
+                fly.style.backgroundImage = "url('mosquito.jpg')";
+                move = setInterval(moveFly, speed);
+                paused = false;
+                if (10 > countSmacks > 0 && countSmacks % 3 == 0) {
+                    speed -= 130;
+                    size -= 10;
+                    fly.style.width = fly.style.height = size + "px";
+                    console.log(countSmacks + " " + speed);
+                }
+                if (countSmacks == 30) {
+                    alert("Don't you have some work to do? :D");
+                }
+            } else {
+                buzz.pause();
+                smackSound.play();
+                clearInterval(move);
+                fly.style.transform = "rotate(0deg)";
+                fly.style.backgroundImage = "url('dead-mosquito.jpg')";
+                paused = true;
+            }
+            introBox.classList.remove('show');
+        }
+    </script>
+</body>
+
+</html>
